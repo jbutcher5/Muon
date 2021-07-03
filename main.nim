@@ -35,9 +35,27 @@ proc void(query: string): Query =
   for i in items(0, data.len):
     result.results.add newPackage($(i+1), data[i]["name"].getStr, data[i]["short_desc"].getStr, data[i]["version"].getStr)
 
+proc aur(query: string): Query =
+
+  let
+    url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [query]
+    data: JsonNode = parseJson(client.request(url).body)["results"]
+
+  var length: int
+
+  if data.len > 50:
+    length = 49
+
+  else:
+    length = data.len
+
+  for i in items(0, length):
+    result.results.add newPackage($(i+1), data[i]["Name"].getStr, data[i]["Description"].getStr, data[i]["Version"].getStr)
+
+
 proc main() =
   var
-    data: Query = void("gcc")
+    data: Query = aur("cargo")
     table: TerminalTable
 
   table.add "Index", "Package", "Description", "Version"
@@ -47,5 +65,4 @@ proc main() =
 
   table.echoTableSeps(seps = boxSeps)
 
-with isMainModule:
-  main()
+main()
