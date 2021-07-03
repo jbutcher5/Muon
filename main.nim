@@ -26,13 +26,19 @@ proc newPackage(index: string, name: string, description: string, version: strin
   result.description = description
   result.version = version
 
+proc getMax(data: JsonNode, largest: int): int =
+  if data.len > largest:
+    return largest
+
+  return data.len
+
 proc void(query: string): Query =
 
   let
     url = "https://xq-api.voidlinux.org/v1/query/x86_64?q=$#" % [query]
     data: JsonNode = parseJson(client.request(url).body)["data"]
 
-  for i in items(0, data.len):
+  for i in items(0, getMax(data, 50)):
     result.results.add newPackage($(i+1), data[i]["name"].getStr, data[i]["short_desc"].getStr, data[i]["version"].getStr)
 
 proc aur(query: string): Query =
@@ -41,15 +47,7 @@ proc aur(query: string): Query =
     url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [query]
     data: JsonNode = parseJson(client.request(url).body)["results"]
 
-  var length: int
-
-  if data.len > 50:
-    length = 49
-
-  else:
-    length = data.len
-
-  for i in items(0, length):
+  for i in items(0, getMax(data, 50)):
     result.results.add newPackage($(i+1), data[i]["Name"].getStr, data[i]["Description"].getStr, data[i]["Version"].getStr)
 
 
