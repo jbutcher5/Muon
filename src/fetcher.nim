@@ -32,7 +32,7 @@ proc getMax(data: JsonNode, largest: int): int =
 
   return data.len
 
-proc void*(query: string): Query =
+proc xq*(query: string): Query =
 
   let
     url = "https://xq-api.voidlinux.org/v1/query/x86_64?q=$#" % [query]
