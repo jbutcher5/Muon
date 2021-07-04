@@ -38,7 +38,7 @@ proc void*(query: string): Query =
     url = "https://xq-api.voidlinux.org/v1/query/x86_64?q=$#" % [query]
     data: JsonNode = parseJson(client.request(url).body)["data"]
 
-  for i in items(0, getMax(data, 50)):
+  for i in items(0, getMax(data, 10)):
     result.results.add newPackage($(i+1), data[i]["name"].getStr, data[i]["short_desc"].getStr, data[i]["version"].getStr)
 
 proc aur*(query: string): Query =
@@ -47,7 +47,7 @@ proc aur*(query: string): Query =
     url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [query]
     data: JsonNode = parseJson(client.request(url).body)["results"]
 
-  for i in items(0, getMax(data, 50)):
+  for i in items(0, getMax(data, 10)):
     result.results.add newPackage($(i+1), data[i]["Name"].getStr, data[i]["Description"].getStr, data[i]["Version"].getStr)
 
 proc createTable*(data: Query) =
