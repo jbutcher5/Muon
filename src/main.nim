@@ -1,4 +1,4 @@
-import httpclient, json, nancy, strutils
+import httpclient, json, nancy, strutils, argparse
 
 let client = httpclient.newHttpClient()
 
@@ -50,11 +50,8 @@ proc aur(query: string): Query =
   for i in items(0, getMax(data, 50)):
     result.results.add newPackage($(i+1), data[i]["Name"].getStr, data[i]["Description"].getStr, data[i]["Version"].getStr)
 
-
-proc main() =
-  var
-    data: Query = aur("cargo")
-    table: TerminalTable
+proc createTable(data: Query) =
+  var table: TerminalTable
 
   table.add "Index", "Package", "Description", "Version"
 
@@ -62,5 +59,8 @@ proc main() =
     table.add i.index, i.name, i.description, i.version
 
   table.echoTableSeps(seps = boxSeps)
+
+proc main() =
+  createTable(aur("gnome"))
 
 main()
