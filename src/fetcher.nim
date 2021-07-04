@@ -10,13 +10,13 @@ iterator items(start: int, final: int): int =
     inc curr
 
 type
-  Package = object
+  Package* = object
     index: string
     name: string
     description: string
     version: string
 
-  Query = object
+  Query* = object
     results: seq[Package]
     url: string
 
@@ -32,7 +32,7 @@ proc getMax(data: JsonNode, largest: int): int =
 
   return data.len
 
-proc void(query: string): Query =
+proc void*(query: string): Query =
 
   let
     url = "https://xq-api.voidlinux.org/v1/query/x86_64?q=$#" % [query]
@@ -41,7 +41,7 @@ proc void(query: string): Query =
   for i in items(0, getMax(data, 50)):
     result.results.add newPackage($(i+1), data[i]["name"].getStr, data[i]["short_desc"].getStr, data[i]["version"].getStr)
 
-proc aur(query: string): Query =
+proc aur*(query: string): Query =
 
   let
     url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [query]
@@ -50,7 +50,7 @@ proc aur(query: string): Query =
   for i in items(0, getMax(data, 50)):
     result.results.add newPackage($(i+1), data[i]["Name"].getStr, data[i]["Description"].getStr, data[i]["Version"].getStr)
 
-proc createTable(data: Query) =
+proc createTable*(data: Query) =
   var table: TerminalTable
 
   table.add "Index", "Package", "Description", "Version"
@@ -59,8 +59,3 @@ proc createTable(data: Query) =
     table.add i.index, i.name, i.description, i.version
 
   table.echoTableSeps(seps = boxSeps)
-
-proc main() =
-  createTable(aur("gnome"))
-
-main()
