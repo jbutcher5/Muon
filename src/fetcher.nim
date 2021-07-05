@@ -22,22 +22,27 @@ type
     results: seq[Package]
     url: string
 
-proc newProtoPackage(name: string, description: string, version: string): ProtoPackage =
+proc newProtoPackage(name: string, description: string,
+    version: string): ProtoPackage =
   result.name = name
   result.description = description
   result.version = version
 
-proc newPackage(index: string, name: string, description: string, version: string): Package =
+proc newPackage(index: string, name: string, description: string,
+    version: string): Package =
   result.index = index
   result.name = name
   result.description = description
   result.version = version
 
-proc getMax(data: JsonNode, largest: int): int =
-  if data.len > largest:
-    return largest
+proc getMax(data: var seq[Package], largest: int) =
 
-  return data.len
+  if data.len > largest:
+    var new: seq[Package]
+    for i in items(0, largest):
+      new.add data[i]
+
+    data = new
 
 proc exactMatch(packageList: var seq[ProtoPackage], packageName: string) =
 
@@ -56,12 +61,15 @@ proc xq*(query: string): Query =
   var packageList: seq[ProtoPackage]
 
   for index, item in data.getElems():
-    packageList.add newProtoPackage(item["name"].getStr, item["short_desc"].getStr, item["version"].getStr)
+    packageList.add newProtoPackage(item["name"].getStr, item[
+        "short_desc"].getStr, item["version"].getStr)
 
   packageList.exactMatch(query)
 
   for index, item in packageList:
     result.results.add newPackage($(index+1), item.name, item.description, item.version)
+
+  result.results.getMax(10)
 
 proc aur*(query: string): Query =
 
@@ -69,8 +77,18 @@ proc aur*(query: string): Query =
     url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [query]
     data: JsonNode = parseJson(client.request(url).body)["results"]
 
-  for i in items(0, getMax(data, 10)):
-    result.results.add newPackage($(i+1), data[i]["Name"].getStr, data[i]["Description"].getStr, data[i]["Version"].getStr)
+  var packageList: seq[ProtoPackage]
+
+  for item in data.getElems():
+    packageList.add newProtoPackage(item["Name"].getStr, item[
+        "Description"].getStr, item["Version"].getStr)
+
+  packageList.exactMatch(query)
+
+  for index, item in packageList:
+    result.results.add newPackage($(index+1), item.name, item.description, item.version)
+
+  result.results.getMax(10)
 
 proc createTable*(data: Query) =
   var table: TerminalTable
