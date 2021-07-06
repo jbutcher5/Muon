@@ -52,7 +52,7 @@ proc exactMatch(packageList: var seq[ProtoPackage], packageName: string) =
       packageList.delete(index+1)
       return
 
-proc xq*(query: string): Query =
+proc xq*(query: string, quantity: int): Query =
 
   let
     url = "https://xq-api.voidlinux.org/v1/query/x86_64?q=$#" % [query]
@@ -69,9 +69,9 @@ proc xq*(query: string): Query =
   for index, item in packageList:
     result.results.add newPackage($(index+1), item.name, item.description, item.version)
 
-  result.results.getMax(10)
+  result.results.getMax(quantity)
 
-proc aur*(query: string): Query =
+proc aur*(query: string, quantity: int): Query =
 
   let
     url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [query]
@@ -88,7 +88,7 @@ proc aur*(query: string): Query =
   for index, item in packageList:
     result.results.add newPackage($(index+1), item.name, item.description, item.version)
 
-  result.results.getMax(10)
+  result.results.getMax(quantity)
 
 proc createTable*(data: Query) =
   var table: TerminalTable
