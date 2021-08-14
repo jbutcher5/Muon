@@ -22,3 +22,14 @@ Muon is a void linux and arch aur package query tool. Simply you can query the n
 `muon gcc -r void`
 
 `muon gcc -r void -i 20`
+
+## Build
+
+1. [Install Nim](https://nim-lang.org/install_unix.html)
+2. Install [Nancy](https://nimble.directory/pkg/nancy) and [argparse](https://nimble.directory/pkg/argparse)
+3. Close the Muon repository `git clone https://github.com/KJ002/Muon.git && cd Muon/src`
+4. Execute `nim c -d:ssl -d:release muon.nim`
+
+The binary will now be located in `Muon/src` under the name `muon`. This binary can now be added to PATH.
+
+1. Execute `sudo cp muon /usr/local/bin`
