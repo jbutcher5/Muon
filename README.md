@@ -3,16 +3,22 @@ Muon is a void linux and arch aur package query tool. Simply you can query the n
 
 ---
 
+<img align="right" src="https://user-images.githubusercontent.com/36408549/129447824-e48225cd-7730-4c41-a34a-574cabde3198.png" width="600"></img>
+
 ### Usage
 
 `muon <package_name> -r <repo>`
-
-`muon gcc -r aur`
-
-`muon gcc -r void`
 
 ### Options
 
 `-r` - repo to search
 
 `-i` - search results to print (default 10)
+
+### Examples
+
+`muon gcc -r aur`
+
+`muon gcc -r void`
+
+`muon gcc -r void -i 20`
