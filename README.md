@@ -3,7 +3,7 @@ Muon is a void linux and arch aur package query tool. Simply you can query the n
 
 ---
 
-<img align="right" src="https://user-images.githubusercontent.com/36408549/129447824-e48225cd-7730-4c41-a34a-574cabde3198.png" width="600"></img>
+<img align="right" src="https://user-images.githubusercontent.com/36408549/129447824-e48225cd-7730-4c41-a34a-574cabde3198.png" width="400"></img>
 
 ### Usage
 
