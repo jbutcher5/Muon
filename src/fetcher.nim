@@ -51,10 +51,18 @@ proc htmlASCII(text: string): string =
 
 proc regexMatch(packageList: var seq[ProtoPackage], packageName: string) =
 
-  for index, package in packageList:
-    if find(package.name, re packageName) != -1:
-      packageList.insert(@[packageList[index]], 0)
-      packageList.delete(index+1)
+  var reversedSeq = packageList
+
+  reversedSeq.reverse()
+
+  for index, package in reversedSeq:
+    if find(package.name, re packageName) >= 0:
+      reversedSeq.insert(@[reversedSeq[index]], len(reversedSeq)-1)
+      reversedSeq.delete(index+1)
+
+  reversedSeq.reverse()
+
+  packageList = reversedSeq
 
 proc exactMatch(packageList: var seq[ProtoPackage], packageName: string) =
 
@@ -87,7 +95,7 @@ proc xq*(query: string, quantity: int): Query =
 proc aur*(query: string, quantity: int): Query =
 
   let
-    url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [query]
+    url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [htmlASCII(query)]
     data: JsonNode = parseJson(client.request(url).body)["results"]
 
   var packageList: seq[ProtoPackage]
