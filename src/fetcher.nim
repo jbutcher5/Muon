@@ -1,4 +1,4 @@
-import httpclient, json, nancy, strutils, argparse, sequtils
+import httpclient, json, nancy, strutils, argparse, sequtils, re
 
 let client = httpclient.newHttpClient()
 
@@ -44,6 +44,18 @@ proc getMax(data: var seq[Package], largest: int) =
 
     data = new
 
+proc htmlASCII(text: string): string =
+
+  for i in text:
+    result &= "%" & ($i).toHex()
+
+proc regexMatch(packageList: var seq[ProtoPackage], packageName: string) =
+
+  for index, package in packageList:
+    if find(package.name, re packageName) != -1:
+      packageList.insert(@[packageList[index]], 0)
+      packageList.delete(index+1)
+
 proc exactMatch(packageList: var seq[ProtoPackage], packageName: string) =
 
   for index, package in packageList:
@@ -55,7 +67,7 @@ proc exactMatch(packageList: var seq[ProtoPackage], packageName: string) =
 proc xq*(query: string, quantity: int): Query =
 
   let
-    url = "https://xq-api.voidlinux.org/v1/query/x86_64?q=$#" % [query]
+    url = "https://xq-api.voidlinux.org/v1/query/x86_64?q=$#" % [htmlASCII(query)]
     data: JsonNode = parseJson(client.request(url).body)["data"]
 
   var packageList: seq[ProtoPackage]
@@ -64,6 +76,7 @@ proc xq*(query: string, quantity: int): Query =
     packageList.add newProtoPackage(item["name"].getStr, item[
         "short_desc"].getStr, item["version"].getStr)
 
+  packageList.regexMatch(query)
   packageList.exactMatch(query)
 
   for index, item in packageList:
@@ -83,6 +96,7 @@ proc aur*(query: string, quantity: int): Query =
     packageList.add newProtoPackage(item["Name"].getStr, item[
         "Description"].getStr, item["Version"].getStr)
 
+  packageList.regexMatch(query)
   packageList.exactMatch(query)
 
   for index, item in packageList:
