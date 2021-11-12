@@ -15,6 +15,9 @@ type
     description: string
     version: string
 
+  AURProtoPackage = object of ProtoPackage
+    votes:
+
   Package* = object of ProtoPackage
     index: string
 
