@@ -32,7 +32,7 @@ proc newProtoPackage(name: string, description: string,
   result.version = version
 
 proc newAURProtoPackage(name: string, description: string,
-    version: string, votes: int): AURProtoPackag =
+    version: string, votes: int): AURProtoPackage =
   result.name = name
   result.description = description
   result.version = version
@@ -82,6 +82,28 @@ proc exactMatch(packageList: var seq[ProtoPackage], packageName: string) =
       packageList.delete(index+1)
       return
 
+proc voteMatch(packageList: var seq[AURProtoPackage]) =
+
+  var complete = false
+
+  while not complete:
+    for index, package in packageList:
+      for i in 0 ..< index:
+        if packageList[i].votes < package.votes:
+          swap(packageList[i], packageList[index])
+
+    var correctOrder: int = 0
+    for i in 0 ..< packageList.len-1:
+      if packageList[i].votes >= packageList[i+1].votes:
+        correctOrder += 1
+
+    if correctOrder == packageList.len-1:
+      complete = true
+
+proc toProtoSeq(packageList: seq[AURProtoPackage]): seq[ProtoPackage] =
+  for package in packageList:
+    result.add newProtoPackage(package.name, package.description, package.version)
+
 proc xq*(query: string, quantity: int): Query =
 
   let
@@ -112,8 +134,11 @@ proc aur*(query: string, quantity: int): Query =
   var packageList: seq[ProtoPackage]
 
   for item in data.getElems():
-    packageList.add newProtoPackage(item["Name"].getStr, item[
+    packageListAUR.add newAURProtoPackage(item["Name"].getStr, item[
         "Description"].getStr, item["Version"].getStr, item["NumVotes"].getInt)
+
+  packageListAUR.voteMatch()
+  packageList = packageListAUR.toProtoSeq()
 
   packageList.regexMatch(query)
   packageList.exactMatch(query)
