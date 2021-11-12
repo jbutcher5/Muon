@@ -16,7 +16,7 @@ type
     version: string
 
   AURProtoPackage = object of ProtoPackage
-    votes:
+    votes: int
 
   Package* = object of ProtoPackage
     index: string
@@ -30,6 +30,13 @@ proc newProtoPackage(name: string, description: string,
   result.name = name
   result.description = description
   result.version = version
+
+proc newAURProtoPackage(name: string, description: string,
+    version: string, votes: int): AURProtoPackag =
+  result.name = name
+  result.description = description
+  result.version = version
+  result.votes = votes
 
 proc newPackage(index: string, name: string, description: string,
     version: string): Package =
@@ -101,11 +108,12 @@ proc aur*(query: string, quantity: int): Query =
     url = "https://aur.archlinux.org/rpc?type=search&arg=$#" % [htmlASCII(query)]
     data: JsonNode = parseJson(client.request(url).body)["results"]
 
+  var packageListAUR: seq[AURProtoPackage]
   var packageList: seq[ProtoPackage]
 
   for item in data.getElems():
     packageList.add newProtoPackage(item["Name"].getStr, item[
-        "Description"].getStr, item["Version"].getStr)
+        "Description"].getStr, item["Version"].getStr, item["NumVotes"].getInt)
 
   packageList.regexMatch(query)
   packageList.exactMatch(query)
